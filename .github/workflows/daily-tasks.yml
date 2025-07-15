@@ -1,0 +1,43 @@
+# .github/workflows/daily-tasks.yml
+
+name: Daily Feature Store Tasks
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # Runs at 02:00 UTC every day
+  workflow_dispatch:      # Allows manual runs from GitHub interface
+
+jobs:
+  run-feature-store-pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install --upgrade pip
+          pip install requests pandas numpy pyarrow sqlalchemy psycopg2-binary
+
+      - name: Run build script
+        run: |
+          source .venv/bin/activate
+          python feature_store/scripts/build_feature_store.py
+
+      - name: Run backfill
+        run: |
+          source .venv/bin/activate
+          python feature_store/scripts/backfill_feature_store.py
+
+      - name: Run realtime update
+        run: |
+          source .venv/bin/activate
+          python feature_store/scripts/realtime_update.py
