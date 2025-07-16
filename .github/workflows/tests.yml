@@ -1,0 +1,2 @@
+- name: Run tests
+  run: python test_predictive_model.py
